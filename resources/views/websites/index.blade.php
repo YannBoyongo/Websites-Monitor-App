@@ -69,7 +69,11 @@
                                         <p>{{ $website->phone }}</p>
                                     </td>
                                     <td>
-                                        <p>{{ $website->is_up }}</p>
+                                        @if ($website->is_up)
+                                            <span class="status-point status-online"></span>
+                                        @else
+                                            <span class="status-point status-offline"></span>
+                                        @endif
                                     </td>
                                     <td>
                                         <a href="{{ route('websites.edit', $website) }}"
