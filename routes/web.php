@@ -21,6 +21,8 @@ Route::middleware('auth')->group(function () {
 });
 
 
+Route::get('/websites/create', [WebsiteController::class, 'create'])->name('websites.create');
+Route::get('/websites/edit/{website}', [WebsiteController::class, 'edit'])->name('websites.edit');
 Route::get('/websites', [WebsiteController::class, 'index'])->name('websites.index');
 Route::post('/websites', [WebsiteController::class, 'store'])->name('websites.store');
 Route::put('/websites/{id}', [WebsiteController::class, 'update'])->name('websites.update');

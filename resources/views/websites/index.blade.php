@@ -19,14 +19,21 @@
         <div class="card-style-3 mb-30">
             <div class="card-content">
 
-                <div class="alert-box primary-alert">
-                    <div class="alert">
-                        <p class="text-medium">
-                            Website added successfully.
-                        </p>
+                @session('success')
+                    <div class="alert-box success-alert">
+                        <div class="alert">
+                            <h4 class="alert-heading">Success</h4>
+                            <p class="text-medium">
+                                {{ $value }}
+                            </p>
+                        </div>
                     </div>
-                </div>
+                @endsession
 
+                <a href="{{ route('websites.create') }}" class="main-btn primary-btn square-btn btn-hover">
+                    <i class="lni lni-plus"></i>
+                    Add website
+                </a>
                 <div class="table-wrapper table-responsive">
                     <table class="table striped-table">
                         <thead>
@@ -63,6 +70,10 @@
                                     </td>
                                     <td>
                                         <p>{{ $website->is_up }}</p>
+                                    </td>
+                                    <td>
+                                        <a href="{{ route('websites.edit', $website) }}"
+                                            class="main-btn primary-btn btn-hover">Edit</a>
                                     </td>
                                 </tr>
                             @endforeach

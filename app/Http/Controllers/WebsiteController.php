@@ -14,6 +14,14 @@ class WebsiteController extends Controller
         // Return the list of websites
         return view('websites.index', compact('websites'));
     }
+    public function create(){
+        // Return create website form
+        return view('websites.create');
+    }
+    public function edit(Website $website){
+        // Return edit website form
+        return view('websites.edit', compact('website'));
+    }
 
     public function store(Request $request)
     {
@@ -32,7 +40,8 @@ class WebsiteController extends Controller
             'is_up' => true, // By default, websites are enabled (up)
         ]);
 
-        // Return the newly created website
+        // Return the list of websites
+        return redirect()->route('websites.index')->with('success', 'Website added successfully!');
 
     }
 
@@ -43,6 +52,8 @@ class WebsiteController extends Controller
 
         // Validate the incoming request
         $request->validate([
+            //check if the url is valid and unique and in the database
+            'url' => 'required|url|unique:websites,url,'. $website->id,
             'url' => 'required|url',
             'email' => 'nullable|email',
             'phone' => 'nullable|string',
@@ -55,10 +66,9 @@ class WebsiteController extends Controller
             'phone' => $request->phone,
         ]);
 
-        return response()->json([
-            'message' => 'Website updated successfully!',
-            'website' => $website
-        ]);
+        return redirect()->route('websites.index')->with('success', 'Website updated successfully!');
+
+
     }
 
     public function toggleWebsiteStatus($id)
