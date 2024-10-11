@@ -27,3 +27,5 @@ Route::get('/websites', [WebsiteController::class, 'index'])->name('websites.ind
 Route::post('/websites', [WebsiteController::class, 'store'])->name('websites.store');
 Route::put('/websites/{id}', [WebsiteController::class, 'update'])->name('websites.update');
 Route::patch('/websites/{id}/toggle', [WebsiteController::class, 'toggleWebsiteStatus'])->name('websites.toggle');
+
+Route::get('/check-websites', [WebsiteController::class, 'checkWebsites']);
