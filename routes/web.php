@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\WebsiteController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -18,3 +19,9 @@ Route::middleware('auth')->group(function () {
     Route::get('profile', [\App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');
     Route::put('profile', [\App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
 });
+
+
+Route::get('/websites', [WebsiteController::class, 'index'])->name('websites.index');
+Route::post('/websites', [WebsiteController::class, 'store'])->name('websites.store');
+Route::put('/websites/{id}', [WebsiteController::class, 'update'])->name('websites.update');
+Route::patch('/websites/{id}/toggle', [WebsiteController::class, 'toggleWebsiteStatus'])->name('websites.toggle');
