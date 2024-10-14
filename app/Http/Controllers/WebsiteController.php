@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Website;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Http\Client\RequestException;
 
 class WebsiteController extends Controller
 {
@@ -90,65 +92,57 @@ class WebsiteController extends Controller
     {
         // Fetch all websites from the database
         $websites = Website::all();
+       
         $downSites = [];
-
+    
         // Extract the URLs to check
         $statuses = $this->checkWebsitesInParallel($websites->pluck('url')->toArray());
 
+        dd($statuses);
+    
         // Loop through the results and check the status
         foreach ($websites as $website) {
             $status = $statuses[$website->url];
-            
+    
             if (!$status && $website->is_up) {
                 // If the website is down, mark it as down in the database and add to the downSites array
                 $website->update(['is_up' => false]);
                 $downSites[] = $website->url;
+
+                dd($downSites[]);
             } elseif ($status && !$website->is_up) {
                 // If the website is back up, mark it as up in the database
                 $website->update(['is_up' => true]);
             }
         }
-
+    
         // Return the list of down websites
         return response()->json([
             'down_sites' => $downSites,
             'message' => count($downSites) > 0 ? 'Some websites are down.' : 'All websites are up.'
         ]);
     }
-
+    
     protected function checkWebsitesInParallel($urls)
     {
-        $multiHandle = curl_multi_init();
-        $curlHandles = [];
-
-        // Create individual cURL handles for each URL
-        foreach ($urls as $url) {
-            $ch = curl_init($url);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_NOBODY, true);  // We just want to check if the site is up, so no body is needed
-            curl_setopt($ch, CURLOPT_TIMEOUT, 10);   // Set a reasonable timeout
-            curl_multi_add_handle($multiHandle, $ch);
-            $curlHandles[$url] = $ch;
-        }
-
-        // Execute all requests in parallel
-        do {
-            curl_multi_exec($multiHandle, $running);
-            curl_multi_select($multiHandle);
-        } while ($running > 0);
-
-        // Collect the results
         $statuses = [];
-        foreach ($curlHandles as $url => $ch) {
-            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            $statuses[$url] = ($httpCode === 200);  // Site is up if we get a 200 HTTP status code
-            curl_multi_remove_handle($multiHandle, $ch);
-            curl_close($ch);
+    
+        foreach ($urls as $url) {
+            try {
+                $response = Http::timeout(10)->get($url);
+    
+                // Check if the response status is 200 (OK)
+                $statuses[$url] = $response->status() === 200;
+            } catch (RequestException $e) {
+                // Mark the website as down if there's an exception
+                $statuses[$url] = false;
+            } catch (\Exception $e) {
+                // Catch any other unexpected errors and mark as down
+                $statuses[$url] = false;
+            }
         }
-
-        // Close the multi handle
-        curl_multi_close($multiHandle);
-
+    
+    
         return $statuses;
     }
 }

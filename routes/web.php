@@ -1,7 +1,9 @@
 <?php
 
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\WebsiteController;
+use Illuminate\Http\Client\RequestException;
 
 Route::get('/', function () {
     return view('welcome');
@@ -29,3 +31,19 @@ Route::put('/websites/{id}', [WebsiteController::class, 'update'])->name('websit
 Route::patch('/websites/{id}/toggle', [WebsiteController::class, 'toggleWebsiteStatus'])->name('websites.toggle');
 
 Route::get('/check-websites', [WebsiteController::class, 'checkWebsites']);
+
+Route::get('/check', function(){
+
+    try {
+        $response = Http::timeout(30)->get('https://google.com');
+    } catch (RequestException $e) {
+        // Handle the error
+        return response()->json(['error' => 'Unable to connect to the service. Please try again later.'], 500);
+    } catch (\Exception $e) {
+        // Catch any other exception
+        return response()->json(['error' => 'An unexpected error occurred.'], 500);
+    }
+
+    dd($response->status());
+
+});
